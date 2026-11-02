@@ -95,9 +95,12 @@ No direct pushes to `main`.
 ## Environment Setup (Phase 1)
 
 ### 1. AWS account & IAM
-- Create the AWS Free Tier account and turn on MFA for the root user.
-- Create an IAM user for each team member with least-privilege permissions. Don't use the root account for daily work.
-- *Document the IAM groups/policies used here.*
+- We created a new AWS account and signed in as the root user only once — to enable MFA and create individual IAM users.
+- After that initial setup, root credentials are locked away and reserved for emergency/account-recovery use only.
+- Each team member has their own IAM user with a personal username, password, and MFA device.
+- Everyone signs in through the account's IAM sign-in link using their own credentials — no one uses the root account for daily work.
+- The team works within the same AWS account and shares its resources. Access is scoped per person through IAM group permissions (least privilege).
+- CloudTrail logs all activity under each individual user's identity, so actions can be traced back to the person who performed them.
 
 ### 2. AWS CLI
 Install the AWS CLI v2, then set up a named profile:
