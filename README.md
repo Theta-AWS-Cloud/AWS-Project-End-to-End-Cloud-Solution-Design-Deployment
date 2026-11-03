@@ -27,6 +27,7 @@ Security groups lock the path down: the ALB only accepts traffic from CloudFront
 ### Architecture
 
 ```mermaid
+<<<<<<< HEAD
 flowchart LR
     U[Users] -->|HTTPS 443| CF[CloudFront]
     CF -->|"/static/* via OAC"| S3[(S3 Bucket<br/>private, static assets)]
@@ -51,6 +52,21 @@ flowchart LR
     EC2A -.->|CloudWatch agent| CW[CloudWatch<br/>Logs & Alarms]
     EC2B -.-> CW
     ALB -.->|5xx / health metrics| CW
+=======
+## Network Architecture
+
+The application runs in a custom VPC (`10.0.0.0/16`) spread across two Availability Zones for high availability.
+
+| Tier | Subnets | Access |
+|---|---|---|
+| Load balancer (ALB) | 2 public | Internet-facing, ports 80/443 |
+| Application (EC2) | 2 private | Accepts traffic from the ALB only |
+| Database (RDS) | 2 private | Accepts traffic from the app tier only (3306/5432) |
+
+- An internet gateway serves the public subnets, and a NAT gateway lets private instances reach the internet for updates.
+- Security groups chain the tiers together (ALB → app → database), so each layer is reachable only from the layer in front of it.
+- An S3 gateway endpoint keeps S3 traffic on the AWS network.
+>>>>>>> origin/Develop
 ```
 
 **Design decisions**
