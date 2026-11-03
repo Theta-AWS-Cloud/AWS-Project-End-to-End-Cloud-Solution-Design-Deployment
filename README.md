@@ -24,16 +24,19 @@ We serve the app through **Amazon CloudFront** (CDN + HTTPS), which sends traffi
 ### Architecture
 
 ```mermaid
-flowchart LR
-    U[User / Browser] -->|HTTPS| CF[CloudFront<br/>ACM certificate]
-    CF -->|Dynamic requests| ALB[Application Load Balancer]
-    CF -->|Static assets via OAC| S3[(S3 Bucket)]
-    ALB --> TG[Target Group]
-    TG --> EC2A[EC2 Instance]
-    TG --> EC2B[EC2 Instance<br/>Auto Scaling - optional]
-    GH[GitHub Actions] -->|Deploy on push to main| EC2A
-    EC2A -.->|Logs & metrics| CW[CloudWatch]
-    ALB -.->|5xx metrics| CW
+## Network Architecture
+
+The application runs in a custom VPC (`10.0.0.0/16`) spread across two Availability Zones for high availability.
+
+| Tier | Subnets | Access |
+|---|---|---|
+| Load balancer (ALB) | 2 public | Internet-facing, ports 80/443 |
+| Application (EC2) | 2 private | Accepts traffic from the ALB only |
+| Database (RDS) | 2 private | Accepts traffic from the app tier only (3306/5432) |
+
+- An internet gateway serves the public subnets, and a NAT gateway lets private instances reach the internet for updates.
+- Security groups chain the tiers together (ALB → app → database), so each layer is reachable only from the layer in front of it.
+- An S3 gateway endpoint keeps S3 traffic on the AWS network.
 ```
 
 > A full architecture diagram will be added to `/docs` in Phase 4.
