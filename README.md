@@ -27,7 +27,6 @@ Security groups lock the path down: the ALB only accepts traffic from CloudFront
 ### Architecture
 
 ```mermaid
-<<<<<<< HEAD
 flowchart LR
     U[Users] -->|HTTPS 443| CF[CloudFront]
     CF -->|"/static/* via OAC"| S3[(S3 Bucket<br/>private, static assets)]
@@ -52,21 +51,6 @@ flowchart LR
     EC2A -.->|CloudWatch agent| CW[CloudWatch<br/>Logs & Alarms]
     EC2B -.-> CW
     ALB -.->|5xx / health metrics| CW
-=======
-## Network Architecture
-
-The application runs in a custom VPC (`10.0.0.0/16`) spread across two Availability Zones for high availability.
-
-| Tier | Subnets | Access |
-|---|---|---|
-| Load balancer (ALB) | 2 public | Internet-facing, ports 80/443 |
-| Application (EC2) | 2 private | Accepts traffic from the ALB only |
-| Database (RDS) | 2 private | Accepts traffic from the app tier only (3306/5432) |
-
-- An internet gateway serves the public subnets, and a NAT gateway lets private instances reach the internet for updates.
-- Security groups chain the tiers together (ALB → app → database), so each layer is reachable only from the layer in front of it.
-- An S3 gateway endpoint keeps S3 traffic on the AWS network.
->>>>>>> origin/Develop
 ```
 
 **Design decisions**
@@ -80,18 +64,18 @@ The application runs in a custom VPC (`10.0.0.0/16`) spread across two Availabil
 
 ## Tech Stack
 
-| Area | Tools |
-|---|---|
-| Compute | Amazon EC2 (`t3.micro`), 2 instances across 2 AZs, Auto Scaling Group (optional) |
-| Networking | VPC, 2 public subnets, Internet Gateway |
-| Load balancing | Application Load Balancer, Target Group |
-| CDN & HTTPS | Amazon CloudFront (ACM only if a custom domain is added) |
-| Storage | Amazon S3 (static assets, private via Origin Access Control) |
-| Security | IAM (least privilege), Security Groups, CloudFront managed prefix list, CloudTrail |
-| CI/CD | GitHub Actions (OIDC to an IAM role, no stored access keys) |
-| Monitoring & cost | CloudWatch Alarms & Logs (CloudWatch agent on EC2), AWS Budgets |
-| Collaboration | GitHub, Trello |
-| Web app | HTML / CSS / JavaScript |
+| Area              | Tools                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| Compute           | Amazon EC2 (`t3.micro`), 2 instances across 2 AZs, Auto Scaling Group (optional)   |
+| Networking        | VPC, 2 public subnets, Internet Gateway                                            |
+| Load balancing    | Application Load Balancer, Target Group                                            |
+| CDN & HTTPS       | Amazon CloudFront (ACM only if a custom domain is added)                           |
+| Storage           | Amazon S3 (static assets, private via Origin Access Control)                       |
+| Security          | IAM (least privilege), Security Groups, CloudFront managed prefix list, CloudTrail |
+| CI/CD             | GitHub Actions (OIDC to an IAM role, no stored access keys)                        |
+| Monitoring & cost | CloudWatch Alarms & Logs (CloudWatch agent on EC2), AWS Budgets                    |
+| Collaboration     | GitHub, Trello                                                                     |
+| Web app           | HTML / CSS / JavaScript                                                            |
 
 ---
 
@@ -114,11 +98,11 @@ Planned: `scripts/` (deployment and setup scripts) and `.github/workflows/` (CI/
 
 ## Branching Strategy
 
-| Branch | Purpose |
-|---|---|
-| `main` | Production-ready code only. Pushes here trigger deployment. |
-| `Develop` | Integration branch where finished features come together and get tested. |
-| `feature/<short-name>` | One branch per task, e.g. `feature/alb-setup`, `feature/home-page`. |
+| Branch                 | Purpose                                                                  |
+| ---------------------- | ------------------------------------------------------------------------ |
+| `main`                 | Production-ready code only. Pushes here trigger deployment.              |
+| `Develop`              | Integration branch where finished features come together and get tested. |
+| `feature/<short-name>` | One branch per task, e.g. `feature/alb-setup`, `feature/home-page`.      |
 
 > Branch names are case-sensitive: the integration branch is `Develop` with a capital **D**.
 
@@ -141,6 +125,7 @@ No direct pushes to `main`.
 ## Environment Setup (Phase 1)
 
 ### 1. AWS account & IAM
+
 - We created a new AWS account and signed in as the root user only once, to enable MFA and create individual IAM users.
 - After that initial setup, root credentials are locked away and reserved for emergency/account-recovery use only.
 - Each team member has their own IAM user with a personal username, password, and MFA device.
@@ -149,6 +134,7 @@ No direct pushes to `main`.
 - CloudTrail logs all activity under each individual user's identity, so actions can be traced back to the person who performed them.
 
 ### 2. AWS CLI
+
 Install the AWS CLI v2, then set up a named profile:
 
 ```bash
@@ -159,24 +145,28 @@ aws sts get-caller-identity --profile <profile-name>   # check it works
 Never commit access keys to this repo.
 
 ### 3. Networking
+
 - VPC with **two public subnets in different Availability Zones** (e.g. AZ-a and AZ-b) and an Internet Gateway.
 - Region: `<region>`
 
 ### 4. Security groups
-| Security group | Inbound rule | Source |
-|---|---|---|
-| ALB SG | HTTP 80 | CloudFront managed prefix list (`com.amazonaws.global.cloudfront.origin-facing`) |
-| EC2 SG | HTTP 80 | ALB SG |
-| EC2 SG | SSH 22 | Team IPs only (or use SSM Session Manager and skip SSH entirely) |
+
+| Security group | Inbound rule | Source                                                                           |
+| -------------- | ------------ | -------------------------------------------------------------------------------- |
+| ALB SG         | HTTP 80      | CloudFront managed prefix list (`com.amazonaws.global.cloudfront.origin-facing`) |
+| EC2 SG         | HTTP 80      | ALB SG                                                                           |
+| EC2 SG         | SSH 22       | Team IPs only (or use SSM Session Manager and skip SSH entirely)                 |
 
 EC2 doesn't need port 443 because HTTPS is handled by CloudFront.
 
 ### 5. EC2
+
 - Instance type: `t3.micro` (Free Tier eligible)
 - One instance in each public subnet (2 total).
 - Attach an IAM instance role with permissions for the CloudWatch agent (and SSM, if used).
 
 ### 6. S3
+
 - Bucket name: `<bucket-name>`
 - Used for static assets, served under `/static/*`.
 - Block all public access. Reads are allowed only through CloudFront OAC.
@@ -209,8 +199,8 @@ CloudFront URL: `<coming soon>`
 
 ## Team
 
-| Name | Role |
-|---|---|
+| Name     | Role     |
+| -------- | -------- |
 | `<name>` | `<role>` |
 | `<name>` | `<role>` |
 | `<name>` | `<role>` |
