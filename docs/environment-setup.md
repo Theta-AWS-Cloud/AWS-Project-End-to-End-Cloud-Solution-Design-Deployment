@@ -32,16 +32,22 @@ Never commit access keys to this repo.
 
 ## Region & resource names
 - Region: `us-east-1`
-- Network: default VPC
+- Network: theta-vpc
 
 | Resource | Name |
 |---|---|
 | EC2 security group | theta-ec2-sg |
 | ALB security group | theta-alb-sg |
-| EC2 instance | theta-web-1 |
+| VPC | theta-vpc |
+| EC2 instance | theta-web-ec2 (Amazon Linux 2023, nginx) |
+| EC2 instance role | theta-web-server-role |
+| GitHub Actions deploy role | theta-github-deploy |
 | Key pair | theta-key |
 | S3 bucket | theta-static-... |
 | Target group | theta-tg |
 | Load balancer | theta-alb |
+| Site domain | harvesthub.thetacloud.site |
+| CloudFront origin domain | origin.harvesthub.thetacloud.site |
+| ACM certificate | us-east-1, used by CloudFront and the ALB |
 | Budget | theta-zero-spend |
 | Alarm email topic | theta-alerts |
