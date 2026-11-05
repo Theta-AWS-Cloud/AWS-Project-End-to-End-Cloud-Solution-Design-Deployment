@@ -174,11 +174,14 @@ CloudFront URL: `<coming soon>`
 
 ## Team
 
-| Name     | Role     |
-| -------- | -------- |
-| `<name>` | `<role>` |
-| `<name>` | `<role>` |
-| `<name>` | `<role>` |
+| Name                  | Role                           | Responsibilities                                                                                                                                                                                                                          |
+| --------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bismark Hayford       | Project Lead & Cloud Architect | Leads the team, Trello upkeep and close-out, sets deadlines, owns architecture design, ALB, Auto Scaling, CloudFront                                                                                                                      |
+| Theophilus Nuworku    | App Developer                  | Web app build, EC2 hosting, static assets on S3                                                                                                                                                                                           |
+| Jason Osei            | Security Lead                  | IAM groups and users; security groups; ACM certificate (only if a domain is confirmed); S3 locked to CloudFront (OAC); ALB and EC2 restricted to CloudFront traffic; EC2 role for CloudWatch Logs; least-privilege review; documenting open ports |
+| Robert Deku           | DevOps / CI/CD                 | Owns the GitHub repo; branching and branch protection; deploy script; GitHub Actions workflow and secrets; PR reviews; live pipeline demo                                                                                                  |
+| Emmanuel Donkor       | Monitoring & Documentation     | CloudWatch alarms (CPU, 5xx); CloudWatch Logs with 7-day retention; README and environment setup docs; architecture diagram; final deployment checklist                                                                                  |
+| Mathilda Morkeh Annan | Cost (Finance) & Presentation  | AWS Budgets alert; tracking Free Tier usage; confirming a zero bill after teardown; building the presentation deck; coordinating everyone's sections                                                                                       |
 
 ---
 
