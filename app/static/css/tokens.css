@@ -1,0 +1,144 @@
+/* ==========================================================================
+   HARVESTHUB DESIGN SYSTEM — tokens.css
+   Mobile-first, light on data, simple language, big clear prices.
+   Values are for 1440px unless noted. Every colour here is a HarvestHub colour.
+   ========================================================================== */
+
+:root {
+  /* ---------- Colour: core ---------- */
+  --c-forest:         #061F00;  /* primary text, buttons, hairlines, image wells */
+  --c-moss:           #003A0B;  /* dark modules, modal, announcement bar */
+  --c-lime:           #A5E119;  /* main action colour: button hover */
+  --c-white:          #FFFFFF;
+  --c-beige:          #FBFBF6;  /* page ground */
+
+  /* ---------- Colour: beige scale ---------- */
+  --c-beige-25:       #F9F9EF;  /* card fill */
+  --c-beige-50:       #EDEDE1;  /* borders, secondary fills */
+  --c-beige-75:       #D6D6C6;  /* dividers, table lines */
+  --c-beige-100:      #B8B89E;  /* muted icons only */
+
+  /* ---------- Colour: neutrals ---------- */
+  --c-gray-50:        #F9FAFB;
+  --c-gray-100:       #F3F4F6;
+  --c-gray-400:       #99A1AF;  /* icons and disabled, never text on beige */
+  --c-gray-600:       #4A5565;  /* secondary copy, footer links, captions: lightest text on beige */
+  --c-gray-700:       #364153;
+  --c-gray-900:       #101828;
+  --c-text:           var(--c-gray-700);  /* long-form body */
+  --c-on-dark-soft:   var(--c-beige-75);  /* secondary copy on moss */
+  --c-on-dark-muted:  var(--c-beige-50);  /* announcement text */
+
+  /* ---------- Colour: lines & states ---------- */
+  --c-line:           #061F00;                   /* table and type rows */
+  --c-line-warm:      var(--c-beige-75);         /* input borders, soft dividers */
+  --c-line-dark:      #FFFFFF1A;                 /* dividers on moss */
+  --c-hover-tint:     var(--c-beige-50);         /* nav link hover and current fill */
+  --c-nav-line:       rgba(6, 31, 0, .12);       /* nav action border */
+  --c-nav-glass:      rgba(251, 251, 246, .72);  /* nav fill once scrolled, with a 12px blur */
+  --c-focus:          #4D6B18;                   /* input hover / focus */
+  --c-field:          rgba(255, 255, 255, .53);  /* input fill on beige */
+  --c-scrim:          rgba(6, 31, 0, .8);        /* modal backdrop */
+
+  /* ---------- Colour: season stages ----------
+     Each stage has a light tint for backgrounds and a deep shade for headings,
+     icons and active tabs. Plant: mint + olive. Store: sky + sea. Sell: zest + forest. */
+  --t-mint:  #D4FFD6;
+  --t-olive: #4D6B18;
+  --t-sky:   #CEEAED;
+  --t-sea:   #0D3B36;
+  --t-zest:  #DFFFA3;
+
+  /* ---------- Colour: price & status ----------
+     Never colour alone: a price change always carries an arrow and a +/- sign. */
+  --t-up:         #09CF58;
+  --t-down:       #ED502F;
+  --t-alert:      #E7000B;
+  --t-alert-deep: #B42318;  /* error text, alert icon */
+  --t-alert-tint: #FFF1EE;  /* alert background */
+  --t-info:       #7AADA6;
+
+  /* ---------- Typography ---------- */
+  --font-sans: "Albert Sans", "Helvetica Neue", Arial, sans-serif;
+  --fw-regular: 400;   /* reading */
+  --fw-medium:  500;   /* headings, nav, buttons */
+  --fw-semi:    600;   /* bold word in headlines, eyebrows */
+
+  /* scale — names match the s1…s4 classes */
+  --fs-hero:    clamp(40px, 4.6vw, 66px); --lh-hero: 1.04; --ls-hero: -.045em;  /* page hero headline */
+  --fs-lead:    clamp(18px, 1.6vw, 23px); --lh-lead: 1.27;                    /* page hero intro */
+  --fs-display: 38px;  --lh-display: 1.1;    /* hero on dark */
+  --fs-s1:      31px;  --lh-s1:      1.2;    /* H1 */
+  --fs-s2:      24px;  --lh-s2:      1.25;   /* H2 / section title */
+  --fs-quote:   17.6px;--lh-quote:   1.35;   /* testimonials */
+  --fs-tile:    18px;  --lh-tile:    1;      /* industry tile label (caps) */
+  --fs-s4:      16px;  --lh-s4:      1.4;    /* card titles, nav, footer */
+  --fs-s3:      15px;  --lh-s3:      1.4;    /* eyebrow (caps) */
+  --fs-body:    14px;  --lh-body:    1.5;    /* paragraph */
+  --fs-small:   13px;  --lh-small:   1.4;
+  --ls-eyebrow: .03em;
+  --ls-nav:     .25px;
+
+  /* ---------- Spacing ----------
+     Gaps inside components. Section padding and side space are layout tokens. */
+  --sp-1:   4px;
+  --sp-2:   8px;
+  --sp-3:  10px;
+  --sp-4:  16px;
+  --sp-5:  20px;
+  --sp-6:  24px;
+  --sp-7:  35px;
+  --sp-8:  40px;
+  --sp-9:  49px;   /* CTA banner padding */
+  --sp-10: 56px;
+  --sp-11: 84px;
+
+  /* ---------- Radius ---------- */
+  --r-0:    0;       /* modules, CTA banner, page images */
+  --r-xs:   4px;     /* tiles */
+  --r-sm:   5px;     /* images, nav link hover */
+  --r-inset: 12px;   /* box or image inside a card */
+  --r-md:   20px;    /* modal, textarea */
+  --r-lg:   28px;    /* email field */
+  --r-btn:  6px;     /* every button */
+  --r-pill: 70px;    /* nav action */
+  --r-full: 50%;     /* icon buttons */
+
+  /* ---------- Elevation ----------
+     The system is flat. Depth = contrast + 1px rules. One shadow exists. */
+  --e-0: none;
+  --e-1: 1px 1px 12px 0 rgba(6, 31, 0, .10);  /* modal, popover */
+  --e-card: 0 10px 30px -12px rgba(6, 31, 0, .18);  /* price and service cards */
+  --hairline:      1px solid var(--c-line);
+  --hairline-warm: 1px solid var(--c-line-warm);
+
+  /* ---------- Motion ---------- */
+  --dur: .2s;
+  --ease: ease;
+  --fade-link:  .5;   /* link hover opacity */
+  --fade-image: .3;   /* image hover opacity (+ luminosity blend over black) */
+
+  /* ---------- Layout ---------- */
+  --edge:    64px;     /* side space */
+  --max:     1640px;   /* max content width */
+  --gutter:  40px;     /* column gap */
+  --columns: 12;
+  --measure: 68ch;     /* max width for running text */
+  --measure-sm: 450px;
+  --section-compact:  clamp(48px, 3.88vw + 33.5px, 80px);
+  --section-default:  clamp(72px, 3.39vw + 59.3px, 100px);
+  --section-spacious: clamp(96px, 2.91vw + 85.1px, 120px);
+  --page-inline: max(var(--edge), calc((100% - var(--max)) / 2));  /* side space, then centres content past --max */
+  --nav-h:         64px;
+
+  /* ---------- Patterns ---------- */
+  --dot-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23ffffff' fill-opacity='.07'/%3E%3C/svg%3E");
+}
+
+/* Breakpoints — phone < 810 · tablet 810 to 1023 · laptop 1024 to 1199 · desktop ≥ 1200 */
+@media (max-width: 1023px) {
+  :root { --edge: 24px; --gutter: 24px; --fs-s1: 28px; --fs-s2: 21px; --fs-display: 32px; }
+}
+@media (max-width: 809px) {
+  :root { --edge: 16px; --gutter: 16px; --fs-s1: 26px; --fs-s2: 20px; }
+}
