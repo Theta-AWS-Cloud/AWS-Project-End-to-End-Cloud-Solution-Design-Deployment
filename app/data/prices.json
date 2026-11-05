@@ -1,1 +1,192 @@
-{"updated": "Updated today, 6:00 AM", "currency": "Ghana cedis (GH₵)", "crops": [{"id": "maize", "name": "Maize", "icon": "🌽", "pack": "100 kg bag", "kg": 100, "trend": [7.33, 7.55, 7.57, 7.62, 7.69, 7.59, 7.63], "markets": {"Makola, Accra": 8.46, "Kejetia, Kumasi": 8.07, "Takoradi Market": 7.89, "Ho Central": 7.31, "Tamale Central": 6.85, "Techiman": 6.84}}, {"id": "rice", "name": "Local Rice", "icon": "🍚", "pack": "50 kg bag", "kg": 50, "trend": [12.52, 12.94, 13.37, 13.56, 13.72, 13.51, 13.18], "markets": {"Makola, Accra": 14.52, "Kejetia, Kumasi": 13.34, "Takoradi Market": 13.71, "Ho Central": 12.59, "Tamale Central": 11.78, "Techiman": 11.57}}, {"id": "yam", "name": "Yam", "icon": "🍠", "pack": "25 kg basket", "kg": 25, "trend": [10.98, 11.05, 11.19, 11.25, 11.42, 11.44, 11.35], "markets": {"Makola, Accra": 12.86, "Kejetia, Kumasi": 12.16, "Takoradi Market": 12.28, "Ho Central": 11.15, "Tamale Central": 10.33, "Techiman": 9.83}}, {"id": "tomatoes", "name": "Tomatoes", "icon": "🍅", "pack": "52 kg crate", "kg": 52, "trend": [13.52, 13.8, 13.79, 14.14, 14.12, 14.58, 14.95], "markets": {"Makola, Accra": 15.95, "Kejetia, Kumasi": 15.28, "Takoradi Market": 16.24, "Ho Central": 14.48, "Tamale Central": 14.15, "Techiman": 13.08}}, {"id": "pepper", "name": "Pepper", "icon": "🌶️", "pack": "25 kg sack", "kg": 25, "trend": [25.67, 26.22, 25.99, 25.48, 25.35, 26.18, 26.72], "markets": {"Makola, Accra": 28.72, "Kejetia, Kumasi": 27.37, "Takoradi Market": 27.65, "Ho Central": 25.23, "Tamale Central": 25.02, "Techiman": 23.06}}, {"id": "onions", "name": "Onions", "icon": "🧅", "pack": "50 kg sack", "kg": 50, "trend": [11.76, 11.6, 11.82, 11.62, 11.78, 11.56, 11.57], "markets": {"Makola, Accra": 12.51, "Kejetia, Kumasi": 11.87, "Takoradi Market": 12.61, "Ho Central": 11.43, "Tamale Central": 10.52, "Techiman": 10.42}}, {"id": "cassava", "name": "Cassava", "icon": "🥔", "pack": "100 kg bag", "kg": 100, "trend": [3.47, 3.56, 3.61, 3.54, 3.66, 3.62, 3.58], "markets": {"Makola, Accra": 4.0, "Kejetia, Kumasi": 3.68, "Takoradi Market": 3.75, "Ho Central": 3.38, "Tamale Central": 3.21, "Techiman": 3.17}}, {"id": "plantain", "name": "Plantain", "icon": "🍌", "pack": "Bunch (about 15 kg)", "kg": 15, "trend": [7.88, 7.86, 7.88, 8.13, 8.17, 8.24, 8.47], "markets": {"Makola, Accra": 9.14, "Kejetia, Kumasi": 8.63, "Takoradi Market": 9.2, "Ho Central": 8.37, "Tamale Central": 7.68, "Techiman": 7.31}}, {"id": "groundnut", "name": "Groundnut", "icon": "🥜", "pack": "50 kg bag", "kg": 50, "trend": [18.65, 18.41, 18.99, 19.53, 19.74, 19.75, 19.38], "markets": {"Makola, Accra": 20.73, "Kejetia, Kumasi": 20.71, "Takoradi Market": 20.22, "Ho Central": 19.03, "Tamale Central": 17.57, "Techiman": 17.39}}], "buyers": [{"name": "Abena Owusu", "co": "Owusu Fresh Produce", "base": "Kumasi", "buys": ["Tomatoes", "Pepper", "Onions"], "vol": "2 tonnes / week", "tel": "024 410 7733"}, {"name": "Alhassan Iddrisu", "co": "Northern Grains Ltd", "base": "Tamale", "buys": ["Maize", "Rice", "Groundnut"], "vol": "15 tonnes / week", "tel": "020 553 2186"}, {"name": "Nana Yaa Frimpong", "co": "Makola Market Women's Assoc.", "base": "Accra", "buys": ["Yam", "Plantain", "Cassava"], "vol": "5 tonnes / week", "tel": "054 301 9942"}, {"name": "Kofi Essien", "co": "Western Agro Traders", "base": "Takoradi", "buys": ["Maize", "Plantain", "Tomatoes"], "vol": "4 tonnes / week", "tel": "026 872 4410"}, {"name": "Mavis Tetteh", "co": "Volta Fresh Hub", "base": "Ho", "buys": ["Cassava", "Pepper", "Onions"], "vol": "3 tonnes / week", "tel": "050 218 6657"}]}
+{
+  "updated": "Updated today, 6:00 AM",
+  "currency": "Ghana cedis (GH₵)",
+  "crops": [
+    {
+      "id": "maize",
+      "name": "Maize",
+      "icon": "🌽",
+      "pack": "100 kg bag",
+      "kg": 100,
+      "trend": [7.33, 7.55, 7.57, 7.62, 7.69, 7.59, 7.57],
+      "markets": {
+        "Makola, Accra": 8.46,
+        "Kejetia, Kumasi": 8.07,
+        "Takoradi Market": 7.89,
+        "Ho Central": 7.31,
+        "Tamale Central": 6.85,
+        "Techiman": 6.84
+      }
+    },
+    {
+      "id": "rice",
+      "name": "Local Rice",
+      "icon": "🍚",
+      "pack": "50 kg bag",
+      "kg": 50,
+      "trend": [12.52, 12.94, 13.37, 13.56, 13.72, 13.51, 12.92],
+      "markets": {
+        "Makola, Accra": 14.52,
+        "Kejetia, Kumasi": 13.34,
+        "Takoradi Market": 13.71,
+        "Ho Central": 12.59,
+        "Tamale Central": 11.78,
+        "Techiman": 11.57
+      }
+    },
+    {
+      "id": "yam",
+      "name": "Yam",
+      "icon": "🍠",
+      "pack": "25 kg basket",
+      "kg": 25,
+      "trend": [10.98, 11.05, 11.19, 11.25, 11.42, 11.44, 11.44],
+      "markets": {
+        "Makola, Accra": 12.86,
+        "Kejetia, Kumasi": 12.16,
+        "Takoradi Market": 12.28,
+        "Ho Central": 11.15,
+        "Tamale Central": 10.33,
+        "Techiman": 9.83
+      }
+    },
+    {
+      "id": "tomatoes",
+      "name": "Tomatoes",
+      "icon": "🍅",
+      "pack": "52 kg crate",
+      "kg": 52,
+      "trend": [13.52, 13.8, 13.79, 14.14, 14.12, 14.58, 14.86],
+      "markets": {
+        "Makola, Accra": 15.95,
+        "Kejetia, Kumasi": 15.28,
+        "Takoradi Market": 16.24,
+        "Ho Central": 14.48,
+        "Tamale Central": 14.15,
+        "Techiman": 13.08
+      }
+    },
+    {
+      "id": "pepper",
+      "name": "Pepper",
+      "icon": "🌶️",
+      "pack": "25 kg sack",
+      "kg": 25,
+      "trend": [25.67, 26.22, 25.99, 25.48, 25.35, 26.18, 26.18],
+      "markets": {
+        "Makola, Accra": 28.72,
+        "Kejetia, Kumasi": 27.37,
+        "Takoradi Market": 27.65,
+        "Ho Central": 25.23,
+        "Tamale Central": 25.02,
+        "Techiman": 23.06
+      }
+    },
+    {
+      "id": "onions",
+      "name": "Onions",
+      "icon": "🧅",
+      "pack": "50 kg sack",
+      "kg": 50,
+      "trend": [11.76, 11.6, 11.82, 11.62, 11.78, 11.56, 11.56],
+      "markets": {
+        "Makola, Accra": 12.51,
+        "Kejetia, Kumasi": 11.87,
+        "Takoradi Market": 12.61,
+        "Ho Central": 11.43,
+        "Tamale Central": 10.52,
+        "Techiman": 10.42
+      }
+    },
+    {
+      "id": "cassava",
+      "name": "Cassava",
+      "icon": "🥔",
+      "pack": "100 kg bag",
+      "kg": 100,
+      "trend": [3.47, 3.56, 3.61, 3.54, 3.66, 3.62, 3.53],
+      "markets": {
+        "Makola, Accra": 4,
+        "Kejetia, Kumasi": 3.68,
+        "Takoradi Market": 3.75,
+        "Ho Central": 3.38,
+        "Tamale Central": 3.21,
+        "Techiman": 3.17
+      }
+    },
+    {
+      "id": "plantain",
+      "name": "Plantain",
+      "icon": "🍌",
+      "pack": "Bunch (about 15 kg)",
+      "kg": 15,
+      "trend": [7.88, 7.86, 7.88, 8.13, 8.17, 8.24, 8.39],
+      "markets": {
+        "Makola, Accra": 9.14,
+        "Kejetia, Kumasi": 8.63,
+        "Takoradi Market": 9.2,
+        "Ho Central": 8.37,
+        "Tamale Central": 7.68,
+        "Techiman": 7.31
+      }
+    },
+    {
+      "id": "groundnut",
+      "name": "Groundnut",
+      "icon": "🥜",
+      "pack": "50 kg bag",
+      "kg": 50,
+      "trend": [18.65, 18.41, 18.99, 19.53, 19.74, 19.75, 19.27],
+      "markets": {
+        "Makola, Accra": 20.73,
+        "Kejetia, Kumasi": 20.71,
+        "Takoradi Market": 20.22,
+        "Ho Central": 19.03,
+        "Tamale Central": 17.57,
+        "Techiman": 17.39
+      }
+    }
+  ],
+  "buyers": [
+    {
+      "name": "Sample Contact A",
+      "co": "Demo Fresh Produce",
+      "base": "Kumasi",
+      "buys": ["Tomatoes", "Pepper", "Onions"],
+      "vol": "2 tonnes / week",
+      "tel": "0XX XXX 0000"
+    },
+    {
+      "name": "Sample Contact B",
+      "co": "Demo Grains Co.",
+      "base": "Tamale",
+      "buys": ["Maize", "Local Rice", "Groundnut"],
+      "vol": "15 tonnes / week",
+      "tel": "0XX XXX 0000"
+    },
+    {
+      "name": "Sample Contact C",
+      "co": "Demo Market Traders",
+      "base": "Accra",
+      "buys": ["Yam", "Plantain", "Cassava"],
+      "vol": "5 tonnes / week",
+      "tel": "0XX XXX 0000"
+    },
+    {
+      "name": "Sample Contact D",
+      "co": "Demo Agro Traders",
+      "base": "Takoradi",
+      "buys": ["Maize", "Plantain", "Tomatoes"],
+      "vol": "4 tonnes / week",
+      "tel": "0XX XXX 0000"
+    },
+    {
+      "name": "Sample Contact E",
+      "co": "Demo Fresh Hub",
+      "base": "Ho",
+      "buys": ["Cassava", "Pepper", "Onions"],
+      "vol": "3 tonnes / week",
+      "tel": "0XX XXX 0000"
+    }
+  ]
+}
