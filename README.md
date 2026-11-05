@@ -212,3 +212,7 @@ Live site: https://harvesthub.thetacloud.site
 This project is designed to stay within the AWS Free Tier. AWS changed the Free Tier for accounts created after mid-2025 to a credit-based free plan, so check which plan the account is on in the Billing console. An AWS Budgets alert warns us before costs go over the limit.
 
 Remember to **stop or delete resources** (especially the ALB and EC2 instance) when they're not in use. We avoid NAT Gateways for the same reason.
+
+## Third-party licences
+
+The charts use [Highcharts](https://www.highcharts.com), stored in `app/static/js/highcharts.js`. Highcharts is not open source. It is used here under its free [educational licence](https://www.highcharts.com/education/) for non-commercial coursework. Any commercial use of this project needs a paid Highcharts licence or a different chart library.
