@@ -3,16 +3,19 @@
 ## Security groups & open ports
 | Security group | Port | Source | Why |
 |---|---|---|---|
-| theta-ec2-sg | 22 (SSH) | Team IPs | Admin access and deploys |
-| theta-ec2-sg | 80 (HTTP) | Anywhere (temporary, Phase 2 testing) | Changed to theta-alb-sg in card 30 |
-| theta-alb-sg | 80 (HTTP) | *To be added in card 22* | |
+| theta-alb-sg | 443 (HTTPS) | CloudFront managed prefix list | CloudFront to the ALB |
+| theta-ec2-sg | 80 (HTTP) | theta-alb-sg | ALB to EC2, inside the VPC |
 
-*Update this table after card 30 with the final rules.*
+The ALB's HTTP port 80 listener redirects to 443.
 
 ## Least privilege (card 31)
 - Before: *screenshot / summary*
 - After: *screenshot / summary*
 
 ## Known trade-offs
-- CloudFront → ALB runs over HTTP, because there's no custom domain for a certificate. The ALB only accepts traffic from CloudFront.
-- SSH (22) stays open for the GitHub Actions deploy, with key-only login.
+- HTTPS runs from the visitor to the load balancer, using an ACM certificate in `us-east-1`. ALB → EC2 runs over HTTP on port 80 inside the VPC. The ALB only accepts traffic from CloudFront.
+
+## Deploy access
+- GitHub Actions assumes the IAM role `theta-github-deploy` through OIDC, with no stored keys.
+- The deploy runs on the instance through SSM (`AWS-RunShellScript`), not SSH.
+- The EC2 instance uses the role `theta-web-server-role`.
