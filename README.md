@@ -26,32 +26,7 @@ Security groups lock the path down: the ALB only accepts traffic from CloudFront
 
 ### Architecture
 
-```mermaid
-flowchart LR
-    U[Users] -->|HTTPS 443| CF[CloudFront]
-    CF -->|"/static/* via OAC"| S3[(S3 Bucket<br/>private, static assets)]
-    CF -->|HTTP 80| IGW
-
-    subgraph VPC[VPC]
-        IGW[Internet Gateway] --> ALB[Application Load Balancer<br/>SG: CloudFront prefix list only]
-        subgraph AZA[Public subnet AZ-a]
-            EC2A[EC2 Instance<br/>SG: from ALB only]
-        end
-        subgraph AZB[Public subnet AZ-b]
-            EC2B[EC2 Instance<br/>SG: from ALB only]
-        end
-        ALB --> EC2A
-        ALB --> EC2B
-    end
-
-    GH[GitHub Actions<br/>OIDC to IAM role] -.->|Deploy app| EC2A
-    GH -.->|Deploy app| EC2B
-    GH -.->|Sync assets + invalidate cache| S3
-
-    EC2A -.->|CloudWatch agent| CW[CloudWatch<br/>Logs & Alarms]
-    EC2B -.-> CW
-    ALB -.->|5xx / health metrics| CW
-```
+![HarvestHub architecture](docs/architecture.svg)
 
 **Design decisions**
 
