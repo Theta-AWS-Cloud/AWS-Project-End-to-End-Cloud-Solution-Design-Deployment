@@ -172,6 +172,13 @@ CloudFront URL: `<coming soon>`
 
 ---
 
+## Documentation
+- [Environment setup](docs/environment-setup.md)
+- [Security](docs/security.md)
+- [Deployment checklist](docs/deployment-checklist.md)
+
+---
+
 ## Team
 
 | Name                  | Role                           | Responsibilities                                                                                                                                                                                                                          |
