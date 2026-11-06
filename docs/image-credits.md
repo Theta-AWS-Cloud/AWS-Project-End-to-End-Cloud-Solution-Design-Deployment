@@ -1,6 +1,6 @@
 # Image Credits
 
-Fill in a row when you add an image. Use Unsplash or Pexels, and compress before adding: crop photos about 600×400 and under 60 KB, scene photos about 1280 wide and under 150 KB.
+Fill in a row when you add an image. Use Unsplash, Pexels or Wikimedia Commons, and compress before adding: crop photos about 600×400 and under 60 KB, scene photos about 1280 wide and under 150 KB.
 
 Paths are relative to `app/static/images/`.
 
