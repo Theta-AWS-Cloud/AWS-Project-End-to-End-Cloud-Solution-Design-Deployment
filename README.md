@@ -197,6 +197,44 @@ The ALB's port 80 listener redirects to 443, but port 80 isn't open in `theta-al
 
 ---
 
+## How Deploys Work
+
+1. A merge to `main` starts [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). The job uses the `production` GitHub environment.
+2. GitHub Actions assumes the role `theta-github-deploy` through OIDC, with no stored access keys. The role trusts only this repo's `main` branch.
+3. The workflow uses SSM (`AWS-RunShellScript`) to run [`deploy.sh`](deploy.sh) on the instance, then waits for the result and fails if the command didn't succeed.
+4. `deploy.sh` resets `/opt/app` to the latest `origin/main` and reloads nginx.
+
+**Static files are a separate step.** The workflow updates the pages and `/data/*.json` on EC2, but it doesn't upload `app/static/` to S3 or invalidate CloudFront yet. When static files change, run these from the repo root:
+
+```bash
+aws s3 sync app/static s3://theta-assets-2026nov/static
+aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/static/*"
+```
+
+---
+
+## Monitoring
+
+Monitoring is in progress. The planned setup is:
+
+- SNS topic `theta-alerts`, emailing the team
+- Alarms for EC2 CPU above 80% and ALB 5xx rate above 5%
+- nginx logs in CloudWatch Logs with 7-day retention
+
+---
+
+## Security Summary
+
+- **Locked-down path:** only CloudFront can reach the ALB, only the ALB can reach the server, and only CloudFront can read the S3 bucket.
+- **Encryption in transit:** HTTPS from the visitor to the load balancer, then HTTP on port 80 inside the VPC from the ALB to EC2.
+- **No SSH:** there is no port 22, and admin access and deploys go through SSM.
+- **Least privilege:** one IAM user per member in role-based groups, with no stored keys for deploys.
+- **Tested and verified:** the lockdown tests all pass. The site works through its domain, while the ALB, the EC2 instance and the S3 bucket can't be reached directly.
+
+Full details: [docs/security.md](docs/security.md).
+
+---
+
 ## Project Phases
 
 - [ ] **Phase 1:** Project setup & environment configuration
