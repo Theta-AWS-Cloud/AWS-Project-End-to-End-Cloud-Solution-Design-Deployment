@@ -25,6 +25,15 @@ All tests pass. The ALB and EC2 addresses are left out on purpose, because this 
 | EC2 public IP | Blocked | ✅ Timeout (curl exit code 28) |
 | Direct S3 URL | Blocked | ✅ 403 Forbidden |
 
+## If something breaks
+
+| What you see | Cause | Fix |
+|---|---|---|
+| 504 on the site | The ALB security group rule is wrong | Check the prefix-list rule on `theta-alb-sg` is HTTPS 443, not 80 |
+| 502, or the target is unhealthy | The server security group rule is wrong | Check `theta-web-sg` allows HTTP 80 from `theta-alb-sg` |
+| Pages load as plain text with no styling | CSS, JS or images aren't loading from S3 | Check the `/static/*` CloudFront behaviour, Origin Access Control (`theta-assets-oac`) and the bucket policy |
+| The deploy fails | Not a security group problem | SSM doesn't use inbound ports, so check the SSM side and the workflow run |
+
 ## Least privilege (card 31)
 - Before: *screenshot / summary*
 - After: *screenshot / summary*
