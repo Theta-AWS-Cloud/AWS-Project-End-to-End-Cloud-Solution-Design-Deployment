@@ -44,18 +44,18 @@ Security groups lock the path down: the ALB only accepts traffic from CloudFront
 
 ## Tech Stack
 
-| Area              | Tools                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------- |
+| Area              | Tools |
+| ----------------- | ----- |
 | Compute           | Amazon EC2 (`t3.micro`), 1 instance (`theta-web-ec2`, Amazon Linux 2023, nginx); Auto Scaling optional, not set up |
-| Networking        | VPC (`theta-vpc`), 2 public subnets, Internet Gateway                              |
-| Load balancing    | Application Load Balancer, Target Group                                            |
-| CDN & HTTPS       | Amazon CloudFront, custom domain, ACM certificate in `us-east-1`                   |
-| Storage           | Amazon S3 (static assets, private via Origin Access Control)                       |
-| Security          | IAM (least privilege), Security Groups, CloudFront managed prefix list, CloudTrail |
+| Networking        | VPC (`theta-vpc`), 2 public subnets, Internet Gateway, no NAT gateway; DNS at Spaceship |
+| Load balancing    | Application Load Balancer (`theta-alb`), target group (`theta-tg`) |
+| CDN & HTTPS       | Amazon CloudFront, custom domain, ACM certificate in `us-east-1` |
+| Storage           | Amazon S3 (`theta-assets-2026nov`, private through Origin Access Control) |
+| Security          | IAM (least privilege), security groups, CloudFront managed prefix list, CloudTrail |
 | CI/CD             | GitHub Actions (OIDC to `theta-github-deploy`, no stored access keys), deploys through SSM |
-| Monitoring & cost | CloudWatch Alarms & Logs (CloudWatch agent on EC2), AWS Budgets                    |
-| Collaboration     | GitHub, Trello                                                                     |
-| Web app           | HTML / CSS / JavaScript                                                            |
+| Monitoring & cost | CloudWatch alarms and logs, SNS (`theta-alerts`), AWS Budgets (`theta-zero-spend`) |
+| Collaboration     | GitHub, Trello |
+| Web app           | HTML, CSS, JavaScript, Highcharts |
 
 ---
 
@@ -63,21 +63,43 @@ Security groups lock the path down: the ALB only accepts traffic from CloudFront
 
 ```
 .
-├── app/                  # Web application source
-│   ├── *.html            # Pages (served from EC2)
-│   ├── data/             # JSON data (served from EC2, not cached)
-│   └── static/           # Uploaded to S3 and served under /static/
-│       ├── css/          # Stylesheets
-│       ├── images/       # Images
-│       └── js/           # Scripts
-├── docs/                 # Architecture diagram, setup and security notes, image credits
+├── .github/
+│   └── workflows/
+│       └── deploy.yml           # Deploys to EC2 on every push to main
+├── app/                         # Web application source
+│   ├── about.html
+│   ├── crops.html
+│   ├── index.html
+│   ├── plant.html
+│   ├── sell.html
+│   ├── services.html
+│   ├── store.html
+│   ├── data/                    # JSON data (served from EC2, not cached)
+│   │   ├── calendar.json
+│   │   ├── crops.json
+│   │   ├── prices.json
+│   │   └── storage.json
+│   └── static/                  # Uploaded to S3 and served under /static/
+│       ├── css/
+│       │   ├── style.css
+│       │   └── tokens.css       # Design system tokens
+│       ├── images/              # Scene photos and crops/ photos
+│       └── js/
+│           ├── highcharts.js
+│           ├── highcharts-heatmap.js
+│           └── script.js
+├── docs/
+│   ├── architecture.svg         # Architecture diagram
+│   ├── deployment-checklist.md  # Full rebuild order
+│   ├── environment-setup.md     # Account, IAM groups, CLI, resource names
+│   ├── image-credits.md         # Photo sources and licences
+│   └── security.md              # Open ports, lockdown tests, troubleshooting
+├── deploy.sh                    # Runs on the instance to update the site
 ├── LICENSE
 └── README.md
 ```
 
-Planned: `scripts/` (deployment and setup scripts) and `.github/workflows/` (CI/CD pipeline, Phase 4).
-
-### Local testing
+## Local Testing
 
 Pages load their data with `fetch`, so opening them directly from disk won't work. Run a local web server instead:
 
