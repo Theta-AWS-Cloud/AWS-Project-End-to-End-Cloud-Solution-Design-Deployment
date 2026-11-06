@@ -1,28 +1,32 @@
-# End-to-End Cloud Solution Design & Deployment
+# HarvestHub on AWS: End-to-End Cloud Solution Design & Deployment
 
-A secure, highly available and scalable web application deployed on AWS, built as a group project using GitHub for version control and Trello for project management. The design aims to keep costs within the AWS Free Tier (or the free plan credits on newer AWS accounts).
+## About the project
+
+ThetaCloud, a cloud solutions team, designed and deployed HarvestHub on AWS. HarvestHub is a fictional agri-tech startup that helps Ghana's smallholder farmers through the season: Plant → Store → Sell. The World Food Programme estimates Ghana loses about US$1.9 billion a year to post-harvest losses, around 30% of smallholder incomes ([source](https://gna.org.gh/2024/08/post-harvest-losses-impoverishing-ghanaian-farmers/)), and much of that comes from not having the right information at the right time. In one line: ThetaCloud designed and deployed HarvestHub on AWS for an agri-tech startup helping smallholder farmers.
+
+**Live site: https://harvesthub.thetacloud.site**
 
 ---
 
 ## The Problem
 
-A fast-growing startup has launched a new web application, but users are dealing with:
+HarvestHub's website is growing fast, but it has four technical problems, all on a limited budget:
 
-- Slow page load times
-- Inconsistent availability during peak traffic
-- Concerns about the security of the application
-- No structured deployment process, which makes collaboration hard and increases the risk of deployment errors
-
-They need a secure, highly available and scalable cloud solution that fits a limited budget and supports future growth.
+- **Slow page loads**, especially on weak mobile data in farming areas
+- **Crashes at peak times**, such as when new prices go up each morning
+- **Security concerns**, because tampered prices or fake storage listings would cheat the farmers relying on them
+- **Manual deploys**, with no structured process, so mistakes go live unchecked and developers overwrite each other's work
 
 ## Our Solution
 
-Users reach the app at https://harvesthub.thetacloud.site over HTTPS through **Amazon CloudFront**. CloudFront routes requests by path:
+We designed the platform for high availability, but it runs on one EC2 instance for now to stay within the budget.
+
+Users reach the site at https://harvesthub.thetacloud.site over HTTPS through **Amazon CloudFront**, which routes requests by path:
 
 - **`/static/*`** (images, CSS, JS) is cached by CloudFront and served from a private **S3** bucket, readable only by CloudFront through Origin Access Control (OAC).
 - **Everything else** (pages and `/data/*.json`) is not cached and goes over HTTPS to an **Application Load Balancer**, which forwards it over HTTP on port 80 inside the VPC to **one EC2 instance** running nginx.
 
-Security groups lock the path down: the ALB only accepts traffic from CloudFront, and the EC2 instance only accepts traffic from the ALB. **GitHub Actions** deploys the app to the instance through SSM and syncs static assets to S3, and **CloudWatch** monitors health and errors.
+Security groups lock the path down: the ALB only accepts traffic from CloudFront, and the EC2 instance only accepts traffic from the ALB. **GitHub Actions** deploys the app to the instance through SSM.
 
 ### Architecture
 
@@ -30,11 +34,11 @@ Security groups lock the path down: the ALB only accepts traffic from CloudFront
 
 **Design decisions**
 
-- **HTTPS from the visitor to the load balancer.** Visitors connect to CloudFront over HTTPS, and CloudFront connects to the ALB over HTTPS on port 443 via `origin.harvesthub.thetacloud.site`, using the same ACM certificate. The ALB's HTTP port 80 listener redirects to 443. From the ALB to EC2, traffic uses HTTP on port 80 inside the VPC. The ALB security group only allows the CloudFront managed prefix list, so the ALB can't be reached directly.
-- **Public subnets for EC2.** Private subnets would need a NAT Gateway (~$30+/month), which breaks the budget. Instead, the instance sits in a public subnet, but its security group only accepts traffic from the ALB.
+- **HTTPS from the visitor to the load balancer.** Visitors connect to CloudFront over HTTPS, and CloudFront connects to the ALB over HTTPS on port 443 via `origin.harvesthub.thetacloud.site`, using the same ACM certificate. The ALB's port 80 listener redirects to 443. From the ALB to EC2, traffic uses HTTP on port 80 inside the VPC.
+- **Public subnets for EC2.** Private subnets would need a NAT gateway (about $30+ a month), which breaks the budget. The instance sits in a public subnet, but its security group only accepts traffic from the ALB.
 - **One EC2 instance for now.** A single instance (`theta-web-ec2`) keeps costs down, but if it or its Availability Zone fails, the site is down until it's restored. Auto Scaling is optional and not set up.
-- **Custom domain.** The app is served on `harvesthub.thetacloud.site`, with its ACM certificate in `us-east-1`, the region CloudFront requires.
-- **Caching.** CloudFront's default behaviour uses CachingDisabled, so pages and `/data/*.json` are never cached. Only `/static/*` is cached (CachingOptimized), so each deploy creates an invalidation.
+- **Custom domain.** The site runs on `harvesthub.thetacloud.site`, with DNS at Spaceship and the ACM certificate in `us-east-1`, the region CloudFront requires.
+- **Caching.** CloudFront's default behaviour uses CachingDisabled, so pages and `/data/*.json` are never cached. Only `/static/*` is cached (CachingOptimized), so changed static files need an invalidation.
 
 ---
 
@@ -112,6 +116,54 @@ No direct pushes to `main`.
 
 ---
 
+## Project Phases
+
+- [ ] **Phase 1:** Project setup & environment configuration
+- [ ] **Phase 2:** Web app development & deployment (EC2 + ALB)
+- [ ] **Phase 3:** Security hardening & CloudFront integration
+- [ ] **Phase 4:** CI/CD pipeline, monitoring & cost management
+- [ ] **Phase 5:** Presentation & project showcase
+
+---
+
+## Project Management
+
+Tasks are tracked on Trello with the columns **Backlog → In Progress → Review → Done**.
+
+Trello board: `<link>`
+
+---
+
+## Documentation
+- [Environment setup](docs/environment-setup.md)
+- [Security](docs/security.md)
+- [Deployment checklist](docs/deployment-checklist.md)
+- [Image credits](docs/image-credits.md)
+
+---
+
+## Team
+
+| Name                  | Role                           | Responsibilities                                                                                                                                                                                                                          |
+| --------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bismark Hayford       | Project Lead & Cloud Architect | Leads the team, Trello upkeep and close-out, sets deadlines, owns architecture design, ALB, Auto Scaling, CloudFront                                                                                                                      |
+| Theophilus Nuworku    | App Developer                  | Web app build, EC2 hosting, static assets on S3                                                                                                                                                                                           |
+| Jason Osei            | Security Lead                  | IAM groups and users; security groups; ACM certificate; S3 locked to CloudFront (OAC); ALB and EC2 restricted to CloudFront traffic; EC2 role for CloudWatch Logs; least-privilege review; documenting open ports |
+| Robert Deku           | DevOps / CI/CD                 | Owns the GitHub repo; branching and branch protection; deploy script; GitHub Actions workflow and secrets; PR reviews; live pipeline demo                                                                                                  |
+| Emmanuel Donkor       | Monitoring & Documentation     | CloudWatch alarms (CPU, 5xx); CloudWatch Logs with 7-day retention; README and environment setup docs; architecture diagram; final deployment checklist                                                                                  |
+| Mathilda Morkeh Annan | Cost (Finance) & Presentation  | AWS Budgets alert; tracking Free Tier usage; confirming a zero bill after teardown; building the presentation deck; coordinating everyone's sections                                                                                       |
+
+---
+
+## Cost Notes
+
+This project is designed to stay within the AWS Free Tier. AWS changed the Free Tier for accounts created after mid-2025 to a credit-based free plan, so check which plan the account is on in the Billing console. An AWS Budgets alert warns us before costs go over the limit.
+
+Remember to **stop or delete resources** (especially the ALB and EC2 instance) when they're not in use. We avoid NAT Gateways for the same reason.
+
+## Third-party licences
+
+The charts use [Highcharts](https://www.highcharts.com), stored in `app/static/js/highcharts.js`. Highcharts is not open source. It is used here under its free [educational licence](https://www.highcharts.com/education/) for non-commercial coursework. Any commercial use of this project needs a paid Highcharts licence or a different chart library.
 ## Environment Setup (Phase 1)
 
 ### 1. AWS account & IAM
@@ -162,57 +214,3 @@ The ALB's HTTP port 80 listener redirects to 443. EC2 doesn't need port 443 beca
 
 ---
 
-## Project Phases
-
-- [ ] **Phase 1:** Project setup & environment configuration
-- [ ] **Phase 2:** Web app development & deployment (EC2 + ALB)
-- [ ] **Phase 3:** Security hardening & CloudFront integration
-- [ ] **Phase 4:** CI/CD pipeline, monitoring & cost management
-- [ ] **Phase 5:** Presentation & project showcase
-
----
-
-## Project Management
-
-Tasks are tracked on Trello with the columns **Backlog → In Progress → Review → Done**.
-
-Trello board: `<link>`
-
----
-
-## Live Demo
-
-Live site: https://harvesthub.thetacloud.site
-
----
-
-## Documentation
-- [Environment setup](docs/environment-setup.md)
-- [Security](docs/security.md)
-- [Deployment checklist](docs/deployment-checklist.md)
-- [Image credits](docs/image-credits.md)
-
----
-
-## Team
-
-| Name                  | Role                           | Responsibilities                                                                                                                                                                                                                          |
-| --------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bismark Hayford       | Project Lead & Cloud Architect | Leads the team, Trello upkeep and close-out, sets deadlines, owns architecture design, ALB, Auto Scaling, CloudFront                                                                                                                      |
-| Theophilus Nuworku    | App Developer                  | Web app build, EC2 hosting, static assets on S3                                                                                                                                                                                           |
-| Jason Osei            | Security Lead                  | IAM groups and users; security groups; ACM certificate; S3 locked to CloudFront (OAC); ALB and EC2 restricted to CloudFront traffic; EC2 role for CloudWatch Logs; least-privilege review; documenting open ports |
-| Robert Deku           | DevOps / CI/CD                 | Owns the GitHub repo; branching and branch protection; deploy script; GitHub Actions workflow and secrets; PR reviews; live pipeline demo                                                                                                  |
-| Emmanuel Donkor       | Monitoring & Documentation     | CloudWatch alarms (CPU, 5xx); CloudWatch Logs with 7-day retention; README and environment setup docs; architecture diagram; final deployment checklist                                                                                  |
-| Mathilda Morkeh Annan | Cost (Finance) & Presentation  | AWS Budgets alert; tracking Free Tier usage; confirming a zero bill after teardown; building the presentation deck; coordinating everyone's sections                                                                                       |
-
----
-
-## Cost Notes
-
-This project is designed to stay within the AWS Free Tier. AWS changed the Free Tier for accounts created after mid-2025 to a credit-based free plan, so check which plan the account is on in the Billing console. An AWS Budgets alert warns us before costs go over the limit.
-
-Remember to **stop or delete resources** (especially the ALB and EC2 instance) when they're not in use. We avoid NAT Gateways for the same reason.
-
-## Third-party licences
-
-The charts use [Highcharts](https://www.highcharts.com), stored in `app/static/js/highcharts.js`. Highcharts is not open source. It is used here under its free [educational licence](https://www.highcharts.com/education/) for non-commercial coursework. Any commercial use of this project needs a paid Highcharts licence or a different chart library.
