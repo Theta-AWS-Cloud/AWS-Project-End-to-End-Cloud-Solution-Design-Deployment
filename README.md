@@ -32,6 +32,8 @@ Security groups lock the path down: the ALB only accepts traffic from CloudFront
 
 ![HarvestHub architecture](docs/architecture.svg)
 
+Editable source: [`docs/architecture.drawio`](docs/architecture.drawio).
+
 **Design decisions**
 
 - **HTTPS from the visitor to the load balancer.** Visitors connect to CloudFront over HTTPS, and CloudFront connects to the ALB over HTTPS on port 443 via `origin.harvesthub.thetacloud.site`, using the same ACM certificate. The ALB's port 80 listener redirects to 443. From the ALB to EC2, traffic uses HTTP on port 80 inside the VPC.
@@ -89,6 +91,7 @@ Security groups lock the path down: the ALB only accepts traffic from CloudFront
 │           ├── highcharts-heatmap.js
 │           └── script.js
 ├── docs/
+│   ├── architecture.drawio      # Architecture diagram source
 │   ├── architecture.svg         # Architecture diagram
 │   ├── deployment-checklist.md  # Full rebuild order
 │   ├── environment-setup.md     # Account, IAM groups, CLI, resource names
