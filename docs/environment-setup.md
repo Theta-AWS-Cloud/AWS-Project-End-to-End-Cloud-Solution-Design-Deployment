@@ -1,20 +1,20 @@
 # Environment Setup
 
 ## Account & access model
-- We use one team member's AWS account.
-- The root user signs in only for first-time setup (MFA on root, billing access, an admin IAM user). After that, root credentials are locked away for emergencies only.
-- Each team member has their own IAM user and password, and signs in through the account's IAM sign-in link.
-- Access is scoped per person through IAM groups (least privilege).
-- CloudTrail logs every action under each user's name.
+- We use one team member's existing AWS account.
+- MFA is on the root user. Root was used only for first-time setup, and its credentials are locked away for emergencies.
+- Each team member has their own IAM user (`firstname.lastname`) and signs in through the account's IAM sign-in link.
+- Users sit in role-based IAM groups. No policies are attached directly to users.
+- CloudTrail records who did what.
 
 ## IAM groups
-| Group | Role | Policies |
+| Group | Who | Policies |
 |---|---|---|
-| Admins | Account owner | AdministratorAccess |
-| Cloud_Architect | Lead & Cloud Architect | AmazonEC2FullAccess, CloudFrontFullAccess |
-| Security | Security | IAMFullAccess, AmazonEC2FullAccess, AmazonS3FullAccess, CloudFrontFullAccess, SecurityAudit |
-| App_Developer | App Developer | AmazonEC2FullAccess, AmazonS3FullAccess |
-| DevOps | DevOps | AmazonEC2ReadOnlyAccess, CloudWatchReadOnlyAccess |
+| Admin | Account owner, plus the Security Lead as backup admin | AdministratorAccess |
+| Cloud_Architect | Lead & Cloud Architect | AmazonEC2FullAccess, CloudFrontFullAccess, AWSCertificateManagerReadOnly |
+| Security | Security Lead | IAMFullAccess, AmazonEC2FullAccess, AmazonS3FullAccess, CloudFrontFullAccess, SecurityAudit, AWSCertificateManagerFullAccess |
+| App_Developer | App Developer | AmazonEC2FullAccess, theta-app-dev-s3-access (the `theta-assets-2026nov` bucket only) |
+| DevOps | DevOps | AmazonEC2ReadOnlyAccess, CloudWatchReadOnlyAccess, theta-devops-server-access |
 | Monitoring_Docs | Monitoring & Documentation | CloudWatchFullAccess, AmazonSNSFullAccess, ReadOnlyAccess |
 | Cost_Presentation | Cost & Presentation | Billing, ReadOnlyAccess |
 
