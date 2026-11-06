@@ -59,13 +59,21 @@ The certificate is a public ACM certificate in `us-east-1`, DNS-validated, cover
 Root has MFA and was used only for first-time setup. Every member has their own IAM user in a role-based group, with no policies attached directly to users. CloudTrail records who did what.
 
 ## Least privilege (card 31)
-- Before: *screenshot / summary*
-- After: *screenshot / summary*
+
+**Before:** `App_Developer` had `AmazonS3FullAccess`, which covers every bucket in the account, including the CloudTrail log buckets.
+
+**Changes:** `AmazonS3FullAccess` was replaced with `theta-app-dev-s3-access`, which is limited to the `theta-assets-2026nov` bucket. The leftover groups `All_Members` and `capstone-interns` were deleted.
+
+**After:** `App_Developer` has `AmazonEC2FullAccess` and `theta-app-dev-s3-access`.
+
+**Tested:** the HarvestHub bucket works, and other buckets are denied.
+
+**What we'd do next:** replace broad managed policies such as `AmazonEC2FullAccess` with scoped custom ones, and keep admin to one break-glass account.
+
+The final IAM groups are listed in [Environment setup](environment-setup.md#iam-groups).
 
 ## Known trade-offs
-- HTTPS runs from the visitor to the load balancer, using an ACM certificate in `us-east-1`. ALB → EC2 runs over HTTP on port 80 inside the VPC. The ALB only accepts traffic from CloudFront.
 
-## Deploy access
-- GitHub Actions assumes the IAM role `theta-github-deploy` through OIDC, with no stored keys.
-- The deploy runs on the instance through SSM (`AWS-RunShellScript`), not SSH.
-- The EC2 instance uses the role `theta-web-server-role`.
+- **One instance.** If `theta-web-ec2` or its Availability Zone fails, the site is down until it's restored. Auto Scaling is optional and not set up.
+- **Public subnet for EC2.** Private subnets would need a NAT gateway, which breaks the budget. The instance has a public IP, but its security group only accepts traffic from the ALB.
+- **No WAF.** It's outside the Free Tier budget.
