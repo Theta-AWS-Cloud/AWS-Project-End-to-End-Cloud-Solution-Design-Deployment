@@ -1,57 +1,63 @@
-# End-to-End Cloud Solution Design & Deployment
+# HarvestHub on AWS: End-to-End Cloud Solution Design & Deployment
 
-A secure, highly available and scalable web application deployed on AWS, built as a group project using GitHub for version control and Trello for project management. The design aims to keep costs within the AWS Free Tier (or the free plan credits on newer AWS accounts).
+## About the project
+
+ThetaCloud, a cloud solutions team, designed and deployed HarvestHub on AWS. HarvestHub is a fictional agri-tech startup that helps Ghana's smallholder farmers through the season: Plant → Store → Sell. The World Food Programme estimates Ghana loses about US$1.9 billion a year to post-harvest losses, around 30% of smallholder incomes ([source](https://gna.org.gh/2024/08/post-harvest-losses-impoverishing-ghanaian-farmers/)), and much of that comes from not having the right information at the right time. In one line: ThetaCloud designed and deployed HarvestHub on AWS for an agri-tech startup helping smallholder farmers.
+
+**Live site: https://harvesthub.thetacloud.site**
 
 ---
 
 ## The Problem
 
-A fast-growing startup has launched a new web application, but users are dealing with:
+HarvestHub's website is growing fast, but it has four technical problems, all on a limited budget:
 
-- Slow page load times
-- Inconsistent availability during peak traffic
-- Concerns about the security of the application
-- No structured deployment process, which makes collaboration hard and increases the risk of deployment errors
-
-They need a secure, highly available and scalable cloud solution that fits a limited budget and supports future growth.
+- **Slow page loads**, especially on weak mobile data in farming areas
+- **Crashes at peak times**, such as when new prices go up each morning
+- **Security concerns**, because tampered prices or fake storage listings would cheat the farmers relying on them
+- **Manual deploys**, with no structured process, so mistakes go live unchecked and developers overwrite each other's work
 
 ## Our Solution
 
-Users reach the app at https://harvesthub.thetacloud.site over HTTPS through **Amazon CloudFront**. CloudFront routes requests by path:
+We designed the platform for high availability, but it runs on one EC2 instance for now to stay within the budget.
+
+Users reach the site at https://harvesthub.thetacloud.site over HTTPS through **Amazon CloudFront**, which routes requests by path:
 
 - **`/static/*`** (images, CSS, JS) is cached by CloudFront and served from a private **S3** bucket, readable only by CloudFront through Origin Access Control (OAC).
 - **Everything else** (pages and `/data/*.json`) is not cached and goes over HTTPS to an **Application Load Balancer**, which forwards it over HTTP on port 80 inside the VPC to **one EC2 instance** running nginx.
 
-Security groups lock the path down: the ALB only accepts traffic from CloudFront, and the EC2 instance only accepts traffic from the ALB. **GitHub Actions** deploys the app to the instance through SSM and syncs static assets to S3, and **CloudWatch** monitors health and errors.
+Security groups lock the path down: the ALB only accepts traffic from CloudFront, and the EC2 instance only accepts traffic from the ALB. **GitHub Actions** deploys the app to the instance through SSM.
 
 ### Architecture
 
 ![HarvestHub architecture](docs/architecture.svg)
 
+Editable source: [`docs/architecture.drawio`](docs/architecture.drawio).
+
 **Design decisions**
 
-- **HTTPS from the visitor to the load balancer.** Visitors connect to CloudFront over HTTPS, and CloudFront connects to the ALB over HTTPS on port 443 via `origin.harvesthub.thetacloud.site`, using the same ACM certificate. The ALB's HTTP port 80 listener redirects to 443. From the ALB to EC2, traffic uses HTTP on port 80 inside the VPC. The ALB security group only allows the CloudFront managed prefix list, so the ALB can't be reached directly.
-- **Public subnets for EC2.** Private subnets would need a NAT Gateway (~$30+/month), which breaks the budget. Instead, the instance sits in a public subnet, but its security group only accepts traffic from the ALB.
+- **HTTPS from the visitor to the load balancer.** Visitors connect to CloudFront over HTTPS, and CloudFront connects to the ALB over HTTPS on port 443 via `origin.harvesthub.thetacloud.site`, using the same ACM certificate. The ALB's port 80 listener redirects to 443. From the ALB to EC2, traffic uses HTTP on port 80 inside the VPC.
+- **Public subnets for EC2.** Private subnets would need a NAT gateway (about $30+ a month), which breaks the budget. The instance sits in a public subnet, but its security group only accepts traffic from the ALB.
 - **One EC2 instance for now.** A single instance (`theta-web-ec2`) keeps costs down, but if it or its Availability Zone fails, the site is down until it's restored. Auto Scaling is optional and not set up.
-- **Custom domain.** The app is served on `harvesthub.thetacloud.site`, with its ACM certificate in `us-east-1`, the region CloudFront requires.
-- **Caching.** CloudFront's default behaviour uses CachingDisabled, so pages and `/data/*.json` are never cached. Only `/static/*` is cached (CachingOptimized), so each deploy creates an invalidation.
+- **Custom domain.** The site runs on `harvesthub.thetacloud.site`, with DNS at Spaceship and the ACM certificate in `us-east-1`, the region CloudFront requires.
+- **Caching.** CloudFront's default behaviour uses CachingDisabled, so pages and `/data/*.json` are never cached. Only `/static/*` is cached (CachingOptimized), so changed static files need an invalidation.
 
 ---
 
 ## Tech Stack
 
-| Area              | Tools                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------- |
+| Area              | Tools |
+| ----------------- | ----- |
 | Compute           | Amazon EC2 (`t3.micro`), 1 instance (`theta-web-ec2`, Amazon Linux 2023, nginx); Auto Scaling optional, not set up |
-| Networking        | VPC (`theta-vpc`), 2 public subnets, Internet Gateway                              |
-| Load balancing    | Application Load Balancer, Target Group                                            |
-| CDN & HTTPS       | Amazon CloudFront, custom domain, ACM certificate in `us-east-1`                   |
-| Storage           | Amazon S3 (static assets, private via Origin Access Control)                       |
-| Security          | IAM (least privilege), Security Groups, CloudFront managed prefix list, CloudTrail |
+| Networking        | VPC (`theta-vpc`), 2 public subnets, Internet Gateway, no NAT gateway; DNS at Spaceship |
+| Load balancing    | Application Load Balancer (`theta-alb`), target group (`theta-tg`) |
+| CDN & HTTPS       | Amazon CloudFront, custom domain, ACM certificate in `us-east-1` |
+| Storage           | Amazon S3 (`theta-assets-2026nov`, private through Origin Access Control) |
+| Security          | IAM (least privilege), security groups, CloudFront managed prefix list, CloudTrail |
 | CI/CD             | GitHub Actions (OIDC to `theta-github-deploy`, no stored access keys), deploys through SSM |
-| Monitoring & cost | CloudWatch Alarms & Logs (CloudWatch agent on EC2), AWS Budgets                    |
-| Collaboration     | GitHub, Trello                                                                     |
-| Web app           | HTML / CSS / JavaScript                                                            |
+| Monitoring & cost | CloudWatch alarms and logs, SNS (`theta-alerts`), AWS Budgets (`theta-zero-spend`) |
+| Collaboration     | GitHub, Trello |
+| Web app           | HTML, CSS, JavaScript, Highcharts |
 
 ---
 
@@ -59,21 +65,44 @@ Security groups lock the path down: the ALB only accepts traffic from CloudFront
 
 ```
 .
-├── app/                  # Web application source
-│   ├── *.html            # Pages (served from EC2)
-│   ├── data/             # JSON data (served from EC2, not cached)
-│   └── static/           # Uploaded to S3 and served under /static/
-│       ├── css/          # Stylesheets
-│       ├── images/       # Images
-│       └── js/           # Scripts
-├── docs/                 # Architecture diagram, setup and security notes, image credits
+├── .github/
+│   └── workflows/
+│       └── deploy.yml           # Deploys to EC2 on every push to main
+├── app/                         # Web application source
+│   ├── about.html
+│   ├── crops.html
+│   ├── index.html
+│   ├── plant.html
+│   ├── sell.html
+│   ├── services.html
+│   ├── store.html
+│   ├── data/                    # JSON data (served from EC2, not cached)
+│   │   ├── calendar.json
+│   │   ├── crops.json
+│   │   ├── prices.json
+│   │   └── storage.json
+│   └── static/                  # Uploaded to S3 and served under /static/
+│       ├── css/
+│       │   ├── style.css
+│       │   └── tokens.css       # Design system tokens
+│       ├── images/              # Scene photos and crops/ photos
+│       └── js/
+│           ├── highcharts.js
+│           ├── highcharts-heatmap.js
+│           └── script.js
+├── docs/
+│   ├── architecture.drawio      # Architecture diagram source
+│   ├── architecture.svg         # Architecture diagram
+│   ├── deployment-checklist.md  # Full rebuild order
+│   ├── environment-setup.md     # Account, IAM groups, CLI, resource names
+│   ├── image-credits.md         # Photo sources and licences
+│   └── security.md              # Open ports, lockdown tests, troubleshooting
+├── deploy.sh                    # Runs on the instance to update the site
 ├── LICENSE
 └── README.md
 ```
 
-Planned: `scripts/` (deployment and setup scripts) and `.github/workflows/` (CI/CD pipeline, Phase 4).
-
-### Local testing
+## Local Testing
 
 Pages load their data with `fetch`, so opening them directly from disk won't work. Run a local web server instead:
 
@@ -112,62 +141,117 @@ No direct pushes to `main`.
 
 ---
 
-## Environment Setup (Phase 1)
+## Environment Setup
 
 ### 1. AWS account & IAM
 
-- We created a new AWS account and signed in as the root user only once, to enable MFA and create individual IAM users.
-- After that initial setup, root credentials are locked away and reserved for emergency/account-recovery use only.
-- Each team member has their own IAM user with a personal username, password, and MFA device.
-- Everyone signs in through the account's IAM sign-in link using their own credentials. No one uses the root account for daily work.
-- The team works within the same AWS account and shares its resources. Access is scoped per person through IAM group permissions (least privilege).
-- CloudTrail logs all activity under each individual user's identity, so actions can be traced back to the person who performed them.
+- We use one member's existing AWS account, in `us-east-1`.
+- MFA is on the root user. Root was used only for first-time setup.
+- Each member has one IAM user (`firstname.lastname`) in a role-based group, with no policies attached directly to users.
+- CloudTrail records who did what.
+
+| IAM group | Policies |
+| --------- | -------- |
+| Admin | AdministratorAccess (account owner, plus the Security Lead as backup admin) |
+| Cloud_Architect | AmazonEC2FullAccess, CloudFrontFullAccess, AWSCertificateManagerReadOnly |
+| Security | IAMFullAccess, AmazonEC2FullAccess, AmazonS3FullAccess, CloudFrontFullAccess, SecurityAudit, AWSCertificateManagerFullAccess |
+| App_Developer | AmazonEC2FullAccess, theta-app-dev-s3-access (the `theta-assets-2026nov` bucket only) |
+| DevOps | AmazonEC2ReadOnlyAccess, CloudWatchReadOnlyAccess, theta-devops-server-access |
+| Monitoring_Docs | CloudWatchFullAccess, AmazonSNSFullAccess, ReadOnlyAccess |
+| Cost_Presentation | Billing, ReadOnlyAccess |
 
 ### 2. AWS CLI
 
-Install the AWS CLI v2, then set up a named profile:
+We use AWS CLI v2 in Ubuntu (WSL) with the profile `theta`. AWS CloudShell also works.
 
 ```bash
-aws configure --profile <profile-name>
-aws sts get-caller-identity --profile <profile-name>   # check it works
+aws configure --profile theta
+aws sts get-caller-identity --profile theta   # check it works
 ```
 
 Never commit access keys to this repo.
 
 ### 3. Networking
 
-- VPC (`theta-vpc`) with **two public subnets in different Availability Zones** (e.g. AZ-a and AZ-b) and an Internet Gateway.
-- Region: `us-east-1`
+- VPC `theta-vpc` (custom) with **two public subnets in different Availability Zones** and an Internet Gateway. There is no NAT gateway.
+- DNS is at Spaceship, with no Route 53: `harvesthub` is a CNAME to CloudFront, and `origin.harvesthub` is a CNAME to the ALB.
 
 ### 4. Security groups
 
-| Security group | Inbound rule | Source                                                                           |
-| -------------- | ------------ | -------------------------------------------------------------------------------- |
-| ALB SG         | HTTPS 443    | CloudFront managed prefix list (`com.amazonaws.global.cloudfront.origin-facing`) |
-| EC2 SG         | HTTP 80      | ALB SG                                                                           |
+| Security group | Inbound rule | Source |
+| -------------- | ------------ | ------ |
+| `theta-alb-sg` | HTTPS 443    | CloudFront managed prefix list (`com.amazonaws.global.cloudfront.origin-facing`) |
+| `theta-web-sg` | HTTP 80      | `theta-alb-sg` |
 
-The ALB's HTTP port 80 listener redirects to 443. EC2 doesn't need port 443 because HTTPS ends at the ALB. Deploys don't use SSH: GitHub Actions assumes `theta-github-deploy` through OIDC and runs on the instance through SSM (`AWS-RunShellScript`).
+The ALB's port 80 listener redirects to 443, but port 80 isn't open in `theta-alb-sg`. SSH is removed: there is no port 22, and admin access goes through SSM. See [docs/security.md](docs/security.md) for the lockdown tests and troubleshooting.
 
 ### 5. EC2
 
-- Instance type: `t3.micro` (Free Tier eligible)
-- One instance: `theta-web-ec2` (Amazon Linux 2023, nginx).
-- Attach the IAM instance role `theta-web-server-role`, with permissions for the CloudWatch agent and SSM.
+- One instance: `theta-web-ec2` (`t3.micro`, Amazon Linux 2023, nginx) in a public subnet.
+- Instance role: `theta-web-server-role` (AmazonSSMManagedInstanceCore, CloudWatchAgentServerPolicy).
+- This repo is cloned to `/opt/app`, and nginx serves the site from `/opt/app/app`.
+- The ALB (`theta-alb`, internet-facing, 2 AZs) forwards to the target group `theta-tg` (HTTP 80, health check `/`).
 
 ### 6. S3
 
-- Bucket name: `<bucket-name>`
-- Used for static assets, served under `/static/*`.
-- Block all public access. Reads are allowed only through CloudFront OAC.
+- Bucket: `theta-assets-2026nov`, with Block all public access on.
+- Files sit under `static/` in the bucket, from `app/static/` in this repo, and are served at `/static/*`.
+- The bucket policy allows reads only from our CloudFront distribution through OAC (`theta-assets-oac`).
+
+---
+
+## How Deploys Work
+
+1. A merge to `main` starts [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). The job uses the `production` GitHub environment.
+2. GitHub Actions assumes the role `theta-github-deploy` through OIDC, with no stored access keys. The role trusts only this repo's `main` branch.
+3. The workflow uses SSM (`AWS-RunShellScript`) to run [`deploy.sh`](deploy.sh) on the instance, then waits for the result and fails if the command didn't succeed.
+4. `deploy.sh` resets `/opt/app` to the latest `origin/main` and reloads nginx.
+
+**Static files are a separate step.** The workflow updates the pages and `/data/*.json` on EC2, but it doesn't upload `app/static/` to S3 or invalidate CloudFront yet. When static files change, run these from the repo root:
+
+```bash
+aws s3 sync app/static s3://theta-assets-2026nov/static
+aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/static/*"
+```
+
+**What to expect after a deploy:**
+
+| Check | Expected |
+|---|---|
+| The workflow run in GitHub Actions | Succeeds. It fails if the SSM command fails |
+| `https://harvesthub.thetacloud.site` | 200, showing the latest pages |
+| `/static/css/style.css` through the domain, after a static upload | 200 from AmazonS3, matching the file in `main` |
+
+---
+
+## Monitoring
+
+Monitoring is in progress. The planned setup is:
+
+- SNS topic `theta-alerts`, emailing the team
+- Alarms for EC2 CPU above 80% and ALB 5xx rate above 5%
+- nginx logs in CloudWatch Logs with 7-day retention
+
+---
+
+## Security Summary
+
+- **Locked-down path:** only CloudFront can reach the ALB, only the ALB can reach the server, and only CloudFront can read the S3 bucket.
+- **Encryption in transit:** HTTPS from the visitor to the load balancer, then HTTP on port 80 inside the VPC from the ALB to EC2.
+- **No SSH:** there is no port 22, and admin access and deploys go through SSM.
+- **Least privilege:** one IAM user per member in role-based groups, with no stored keys for deploys.
+- **Tested and verified:** the lockdown tests all pass. The site works through its domain, while the ALB, the EC2 instance and the S3 bucket can't be reached directly.
+
+Full details: [docs/security.md](docs/security.md).
 
 ---
 
 ## Project Phases
 
-- [ ] **Phase 1:** Project setup & environment configuration
-- [ ] **Phase 2:** Web app development & deployment (EC2 + ALB)
-- [ ] **Phase 3:** Security hardening & CloudFront integration
-- [ ] **Phase 4:** CI/CD pipeline, monitoring & cost management
+- [x] **Phase 1:** Project setup & environment configuration
+- [x] **Phase 2:** Web app development & deployment (EC2 + ALB)
+- [x] **Phase 3:** Security hardening & CloudFront integration
+- [ ] **Phase 4:** CI/CD pipeline, monitoring & cost management (CI/CD and budget in place; monitoring in progress)
 - [ ] **Phase 5:** Presentation & project showcase
 
 ---
@@ -176,17 +260,22 @@ The ALB's HTTP port 80 listener redirects to 443. EC2 doesn't need port 443 beca
 
 Tasks are tracked on Trello with the columns **Backlog → In Progress → Review → Done**.
 
-Trello board: `<link>`
-
 ---
 
-## Live Demo
+## Deliverables
 
-Live site: https://harvesthub.thetacloud.site
+- [x] GitHub repo
+- [ ] Trello board screenshot
+- [x] Architecture diagram
+- [x] Live HTTPS URL
+- [x] README with setup guide
+- [ ] Presentation slides
+- [ ] Demo video (optional)
 
 ---
 
 ## Documentation
+
 - [Environment setup](docs/environment-setup.md)
 - [Security](docs/security.md)
 - [Deployment checklist](docs/deployment-checklist.md)
@@ -209,9 +298,7 @@ Live site: https://harvesthub.thetacloud.site
 
 ## Cost Notes
 
-This project is designed to stay within the AWS Free Tier. AWS changed the Free Tier for accounts created after mid-2025 to a credit-based free plan, so check which plan the account is on in the Billing console. An AWS Budgets alert warns us before costs go over the limit.
-
-Remember to **stop or delete resources** (especially the ALB and EC2 instance) when they're not in use. We avoid NAT Gateways for the same reason.
+The project stays within the AWS Free Tier, with a zero-spend budget (`theta-zero-spend`) to catch any cost and no NAT gateway. Everything is torn down after grading.
 
 ## Third-party licences
 
