@@ -211,6 +211,14 @@ aws s3 sync app/static s3://theta-assets-2026nov/static
 aws cloudfront create-invalidation --distribution-id "$DISTRIBUTION_ID" --paths "/static/*"
 ```
 
+**What to expect after a deploy:**
+
+| Check | Expected |
+|---|---|
+| The workflow run in GitHub Actions | Succeeds. It fails if the SSM command fails |
+| `https://harvesthub.thetacloud.site` | 200, showing the latest pages |
+| `/static/css/style.css` through the domain, after a static upload | 200 from AmazonS3, matching the file in `main` |
+
 ---
 
 ## Monitoring
