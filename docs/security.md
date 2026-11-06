@@ -1,12 +1,15 @@
 # Security
 
-## Security groups & open ports
+## Security groups & open ports (card 32)
+
 | Security group | Port | Source | Why |
 |---|---|---|---|
-| theta-alb-sg | 443 (HTTPS) | CloudFront managed prefix list | CloudFront to the ALB |
-| theta-ec2-sg | 80 (HTTP) | theta-alb-sg | ALB to EC2, inside the VPC |
+| `theta-alb-sg` | 443 (HTTPS) | CloudFront managed prefix list (`com.amazonaws.global.cloudfront.origin-facing`) | Only CloudFront can reach the ALB |
+| `theta-web-sg` | 80 (HTTP) | `theta-alb-sg` | Only the ALB can reach the server |
 
-The ALB's HTTP port 80 listener redirects to 443.
+**SSH is removed.** `theta-web-sg` has no port 22 rule. Admin access goes through AWS Systems Manager (SSM), which doesn't use inbound ports.
+
+**Port 80 on the ALB.** The ALB's port 80 listener redirects to 443, but port 80 isn't open in `theta-alb-sg`. CloudFront connects to the ALB on 443 only, and CloudFront handles the HTTP to HTTPS redirect for visitors.
 
 ## Least privilege (card 31)
 - Before: *screenshot / summary*
