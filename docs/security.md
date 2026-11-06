@@ -11,6 +11,20 @@
 
 **Port 80 on the ALB.** The ALB's port 80 listener redirects to 443, but port 80 isn't open in `theta-alb-sg`. CloudFront connects to the ALB on 443 only, and CloudFront handles the HTTP to HTTPS redirect for visitors.
 
+## Lockdown tests (card 33)
+
+All tests pass. The ALB and EC2 addresses are left out on purpose, because this repo is public.
+
+| Test | Expected | Result |
+|---|---|---|
+| `https://harvesthub.thetacloud.site` | 200 | ✅ 200 |
+| `http://harvesthub.thetacloud.site` | Redirect to HTTPS | ✅ 301 to HTTPS |
+| `/static/css/style.css` through the domain | Served from S3 and cached | ✅ 200 from AmazonS3, cached on repeat requests |
+| `https://origin.harvesthub.thetacloud.site` (ALB) | Blocked | ✅ Timeout |
+| ALB raw DNS name | Blocked | ✅ Timeout (curl exit code 28) |
+| EC2 public IP | Blocked | ✅ Timeout (curl exit code 28) |
+| Direct S3 URL | Blocked | ✅ 403 Forbidden |
+
 ## Least privilege (card 31)
 - Before: *screenshot / summary*
 - After: *screenshot / summary*
