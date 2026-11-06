@@ -28,26 +28,28 @@
 2. Create the profile: `aws configure --profile theta`
 3. Test it: `aws sts get-caller-identity --profile theta`
 
-Never commit access keys to this repo.
+AWS CloudShell also works, and needs no setup. Never commit access keys to this repo.
 
-## Region & resource names
+## Region & networking
 - Region: `us-east-1`
-- Network: theta-vpc
+- VPC: `theta-vpc`, custom, with 2 public subnets and no NAT gateway
+
+## Resource names
 
 | Resource | Name |
 |---|---|
-| EC2 security group | theta-ec2-sg |
-| ALB security group | theta-alb-sg |
-| VPC | theta-vpc |
-| EC2 instance | theta-web-ec2 (Amazon Linux 2023, nginx) |
-| EC2 instance role | theta-web-server-role |
-| GitHub Actions deploy role | theta-github-deploy |
-| Key pair | theta-key |
-| S3 bucket | theta-static-... |
-| Target group | theta-tg |
-| Load balancer | theta-alb |
-| Site domain | harvesthub.thetacloud.site |
-| CloudFront origin domain | origin.harvesthub.thetacloud.site |
-| ACM certificate | us-east-1, used by CloudFront and the ALB |
-| Budget | theta-zero-spend |
-| Alarm email topic | theta-alerts |
+| VPC | `theta-vpc` |
+| ALB security group | `theta-alb-sg` |
+| EC2 security group | `theta-web-sg` |
+| EC2 instance | `theta-web-ec2` (`t3.micro`, Amazon Linux 2023, nginx) |
+| EC2 instance role | `theta-web-server-role` |
+| GitHub Actions deploy role | `theta-github-deploy` |
+| S3 bucket | `theta-assets-2026nov` |
+| CloudFront Origin Access Control | `theta-assets-oac` |
+| Target group | `theta-tg` |
+| Load balancer | `theta-alb` |
+| Site domain | `harvesthub.thetacloud.site` |
+| CloudFront origin domain | `origin.harvesthub.thetacloud.site` |
+| ACM certificate | Public, in `us-east-1`, used by CloudFront and the ALB |
+| Budget | `theta-zero-spend` |
+| Alarm email topic | `theta-alerts` |
