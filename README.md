@@ -237,10 +237,10 @@ Full details: [docs/security.md](docs/security.md).
 
 ## Project Phases
 
-- [ ] **Phase 1:** Project setup & environment configuration
-- [ ] **Phase 2:** Web app development & deployment (EC2 + ALB)
-- [ ] **Phase 3:** Security hardening & CloudFront integration
-- [ ] **Phase 4:** CI/CD pipeline, monitoring & cost management
+- [x] **Phase 1:** Project setup & environment configuration
+- [x] **Phase 2:** Web app development & deployment (EC2 + ALB)
+- [x] **Phase 3:** Security hardening & CloudFront integration
+- [ ] **Phase 4:** CI/CD pipeline, monitoring & cost management (CI/CD and budget in place; monitoring in progress)
 - [ ] **Phase 5:** Presentation & project showcase
 
 ---
@@ -249,11 +249,22 @@ Full details: [docs/security.md](docs/security.md).
 
 Tasks are tracked on Trello with the columns **Backlog → In Progress → Review → Done**.
 
-Trello board: `<link>`
+---
+
+## Deliverables
+
+- [x] GitHub repo
+- [ ] Trello board screenshot
+- [x] Architecture diagram
+- [x] Live HTTPS URL
+- [x] README with setup guide
+- [ ] Presentation slides
+- [ ] Demo video (optional)
 
 ---
 
 ## Documentation
+
 - [Environment setup](docs/environment-setup.md)
 - [Security](docs/security.md)
 - [Deployment checklist](docs/deployment-checklist.md)
@@ -276,9 +287,7 @@ Trello board: `<link>`
 
 ## Cost Notes
 
-This project is designed to stay within the AWS Free Tier. AWS changed the Free Tier for accounts created after mid-2025 to a credit-based free plan, so check which plan the account is on in the Billing console. An AWS Budgets alert warns us before costs go over the limit.
-
-Remember to **stop or delete resources** (especially the ALB and EC2 instance) when they're not in use. We avoid NAT Gateways for the same reason.
+The project stays within the AWS Free Tier, with a zero-spend budget (`theta-zero-spend`) to catch any cost and no NAT gateway. Everything is torn down after grading.
 
 ## Third-party licences
 
