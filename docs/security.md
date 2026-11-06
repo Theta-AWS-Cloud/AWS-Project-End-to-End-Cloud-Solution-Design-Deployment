@@ -34,6 +34,30 @@ All tests pass. The ALB and EC2 addresses are left out on purpose, because this 
 | Pages load as plain text with no styling | CSS, JS or images aren't loading from S3 | Check the `/static/*` CloudFront behaviour, Origin Access Control (`theta-assets-oac`) and the bucket policy |
 | The deploy fails | Not a security group problem | SSM doesn't use inbound ports, so check the SSM side and the workflow run |
 
+## Encryption in transit
+
+- Visitor to CloudFront: HTTPS. HTTP redirects to HTTPS.
+- CloudFront to the ALB: HTTPS only, TLS 1.2, through `origin.harvesthub.thetacloud.site`.
+- ALB to EC2: HTTP on port 80 inside the VPC. HTTPS ends at the load balancer, and `theta-web-sg` only accepts this traffic from the ALB.
+- CloudFront to S3: signed requests through Origin Access Control.
+
+The certificate is a public ACM certificate in `us-east-1`, DNS-validated, covering both `harvesthub.thetacloud.site` and `origin.harvesthub.thetacloud.site`.
+
+## Storage
+
+- `theta-assets-2026nov` has Block all public access turned on.
+- The bucket policy allows reads only from our CloudFront distribution, through `theta-assets-oac`.
+
+## Access & permissions
+
+| Identity | Used by | Allows |
+|---|---|---|
+| `theta-web-server-role` | The EC2 instance | SSM management (`AmazonSSMManagedInstanceCore`) and the CloudWatch agent (`CloudWatchAgentServerPolicy`) |
+| `theta-github-deploy` | GitHub Actions, through OIDC with no stored keys | Trusts only this repo's `main` branch. Can only run SSM commands on our instance, sync the bucket's `static/` folder, and invalidate our distribution |
+| `theta-devops-server-access` | The `DevOps` IAM group | Server access for the DevOps role, alongside its read-only policies |
+
+Root has MFA and was used only for first-time setup. Every member has their own IAM user in a role-based group, with no policies attached directly to users. CloudTrail records who did what.
+
 ## Least privilege (card 31)
 - Before: *screenshot / summary*
 - After: *screenshot / summary*
