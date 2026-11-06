@@ -138,6 +138,65 @@ No direct pushes to `main`.
 
 ---
 
+## Environment Setup
+
+### 1. AWS account & IAM
+
+- We use one member's existing AWS account, in `us-east-1`.
+- MFA is on the root user. Root was used only for first-time setup.
+- Each member has one IAM user (`firstname.lastname`) in a role-based group, with no policies attached directly to users.
+- CloudTrail records who did what.
+
+| IAM group | Policies |
+| --------- | -------- |
+| Admin | AdministratorAccess (account owner, plus the Security Lead as backup admin) |
+| Cloud_Architect | AmazonEC2FullAccess, CloudFrontFullAccess, AWSCertificateManagerReadOnly |
+| Security | IAMFullAccess, AmazonEC2FullAccess, AmazonS3FullAccess, CloudFrontFullAccess, SecurityAudit, AWSCertificateManagerFullAccess |
+| App_Developer | AmazonEC2FullAccess, theta-app-dev-s3-access (the `theta-assets-2026nov` bucket only) |
+| DevOps | AmazonEC2ReadOnlyAccess, CloudWatchReadOnlyAccess, theta-devops-server-access |
+| Monitoring_Docs | CloudWatchFullAccess, AmazonSNSFullAccess, ReadOnlyAccess |
+| Cost_Presentation | Billing, ReadOnlyAccess |
+
+### 2. AWS CLI
+
+We use AWS CLI v2 in Ubuntu (WSL) with the profile `theta`. AWS CloudShell also works.
+
+```bash
+aws configure --profile theta
+aws sts get-caller-identity --profile theta   # check it works
+```
+
+Never commit access keys to this repo.
+
+### 3. Networking
+
+- VPC `theta-vpc` (custom) with **two public subnets in different Availability Zones** and an Internet Gateway. There is no NAT gateway.
+- DNS is at Spaceship, with no Route 53: `harvesthub` is a CNAME to CloudFront, and `origin.harvesthub` is a CNAME to the ALB.
+
+### 4. Security groups
+
+| Security group | Inbound rule | Source |
+| -------------- | ------------ | ------ |
+| `theta-alb-sg` | HTTPS 443    | CloudFront managed prefix list (`com.amazonaws.global.cloudfront.origin-facing`) |
+| `theta-web-sg` | HTTP 80      | `theta-alb-sg` |
+
+The ALB's port 80 listener redirects to 443, but port 80 isn't open in `theta-alb-sg`. SSH is removed: there is no port 22, and admin access goes through SSM. See [docs/security.md](docs/security.md) for the lockdown tests and troubleshooting.
+
+### 5. EC2
+
+- One instance: `theta-web-ec2` (`t3.micro`, Amazon Linux 2023, nginx) in a public subnet.
+- Instance role: `theta-web-server-role` (AmazonSSMManagedInstanceCore, CloudWatchAgentServerPolicy).
+- This repo is cloned to `/opt/app`, and nginx serves the site from `/opt/app/app`.
+- The ALB (`theta-alb`, internet-facing, 2 AZs) forwards to the target group `theta-tg` (HTTP 80, health check `/`).
+
+### 6. S3
+
+- Bucket: `theta-assets-2026nov`, with Block all public access on.
+- Files sit under `static/` in the bucket, from `app/static/` in this repo, and are served at `/static/*`.
+- The bucket policy allows reads only from our CloudFront distribution through OAC (`theta-assets-oac`).
+
+---
+
 ## Project Phases
 
 - [ ] **Phase 1:** Project setup & environment configuration
@@ -186,53 +245,3 @@ Remember to **stop or delete resources** (especially the ALB and EC2 instance) w
 ## Third-party licences
 
 The charts use [Highcharts](https://www.highcharts.com), stored in `app/static/js/highcharts.js`. Highcharts is not open source. It is used here under its free [educational licence](https://www.highcharts.com/education/) for non-commercial coursework. Any commercial use of this project needs a paid Highcharts licence or a different chart library.
-## Environment Setup (Phase 1)
-
-### 1. AWS account & IAM
-
-- We created a new AWS account and signed in as the root user only once, to enable MFA and create individual IAM users.
-- After that initial setup, root credentials are locked away and reserved for emergency/account-recovery use only.
-- Each team member has their own IAM user with a personal username, password, and MFA device.
-- Everyone signs in through the account's IAM sign-in link using their own credentials. No one uses the root account for daily work.
-- The team works within the same AWS account and shares its resources. Access is scoped per person through IAM group permissions (least privilege).
-- CloudTrail logs all activity under each individual user's identity, so actions can be traced back to the person who performed them.
-
-### 2. AWS CLI
-
-Install the AWS CLI v2, then set up a named profile:
-
-```bash
-aws configure --profile <profile-name>
-aws sts get-caller-identity --profile <profile-name>   # check it works
-```
-
-Never commit access keys to this repo.
-
-### 3. Networking
-
-- VPC (`theta-vpc`) with **two public subnets in different Availability Zones** (e.g. AZ-a and AZ-b) and an Internet Gateway.
-- Region: `us-east-1`
-
-### 4. Security groups
-
-| Security group | Inbound rule | Source                                                                           |
-| -------------- | ------------ | -------------------------------------------------------------------------------- |
-| ALB SG         | HTTPS 443    | CloudFront managed prefix list (`com.amazonaws.global.cloudfront.origin-facing`) |
-| EC2 SG         | HTTP 80      | ALB SG                                                                           |
-
-The ALB's HTTP port 80 listener redirects to 443. EC2 doesn't need port 443 because HTTPS ends at the ALB. Deploys don't use SSH: GitHub Actions assumes `theta-github-deploy` through OIDC and runs on the instance through SSM (`AWS-RunShellScript`).
-
-### 5. EC2
-
-- Instance type: `t3.micro` (Free Tier eligible)
-- One instance: `theta-web-ec2` (Amazon Linux 2023, nginx).
-- Attach the IAM instance role `theta-web-server-role`, with permissions for the CloudWatch agent and SSM.
-
-### 6. S3
-
-- Bucket name: `<bucket-name>`
-- Used for static assets, served under `/static/*`.
-- Block all public access. Reads are allowed only through CloudFront OAC.
-
----
-
